@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_pmant_checklist_group" model="ir.sequence">
+        <field name="name">Grupo de Checklists</field>
+        <field name="code">pmant.checklist.group</field>
+        <field name="prefix">GRP-</field>
+        <field name="padding">4</field>
+        <field name="number_next">1</field>
+    </record>
+
+    <record id="view_form_pmant_checklist_respuesta" model="ir.ui.view">
+        <field name="name">pmant.checklist.respuesta.form</field>
+        <field name="model">pmant.checklist.respuesta</field>
+        <field name="arch" type="xml">
+            <form string="Respuesta del Checklist">
+                <sheet>
+                    <group>
+                        <field name="question_id"/>
+                        <field name="respuesta_texto" />
+                        <field name="respuesta_si_no" />
+                        <field name="is_comentario"/>
+                        <field name="comentario" invisible="not is_comentario"/>
+                        <field name="usuario_responsable" readonly="1"/>
+                        <field name="fecha_respuesta" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+<record id="vierw_tree_respuesras" model="ir.ui.view">
+        <field name="name">pmant.checklist.respuesta.tree</field>
+        <field name="model">pmant.checklist.respuesta</field>
+        <field name="arch" type="xml">
+            <tree string="Respuesta del Checklist">
+                <field name="question_id"/>
+                <field name="respuesta_texto" />
+                <field name="respuesta_si_no" />
+                <field name="usuario_responsable" readonly="1"/>
+                <field name="fecha_respuesta" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="view_form_pmant_checklist" model="ir.ui.view">
+        <field name="name">pmant.checklist.form</field>
+        <field name="model">pmant.checklist</field>
+        <field name="arch" type="xml">
+            <form string="Checklist de Mantenimiento">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                        <field name="creado_por" readonly="1"/>
+                        <field name="fecha_creacion" readonly="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Preguntas del Checklist">
+                            <field name="line_questions">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="tipo_respuesta"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

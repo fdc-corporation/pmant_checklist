@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="template_checklist_thanks" name="Checklist Gracias">
+		<t t-call="website.layout">
+			<div class="container my-5 text-center">
+				<h1 class="text-success mb-4">
+					✅ ¡Gracias por completar el checklist!
+				</h1>
+				<p class="mb-4">
+					Tus respuestas han sido registradas correctamente.
+				</p>
+				<a t-att-href="'/my/equipos/' + str(equipo_id) + '/detalles'"  class="btn btn-primary">
+					Ver Detalles del Equipo
+				</a>
+			</div>
+		</t>
+	</template>
+</odoo>

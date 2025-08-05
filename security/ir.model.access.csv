@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_checklist_all,Checklist All,model_pmant_checklist,,1,1,1,1
+access_question_all,Question All,model_pmant_checklist_question,,1,1,1,1
+access_respuesta_all,Respuesta All,model_pmant_checklist_respuesta,,1,1,1,1
+access_pmant_checklist_group_user,access.pmant.checklist.group.user,model_pmant_checklist_group,,1,1,1,1
