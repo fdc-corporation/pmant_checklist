@@ -83,7 +83,7 @@ class Equipo(models.Model):
                 record.qr_checklist_image_2 = False
 
     def action_view_respuestas(self):
-        cant_data = self.env["pmant.checklist.respuesta"].search(
+        cant_data = self.env["pmant.checklist.group"].search(
                 [("equipo_id", "=", self.id)]
             )
         return {
@@ -91,10 +91,11 @@ class Equipo(models.Model):
                 "type": "ir.actions.act_window",  # ¡Este es el campo que faltaba!
                 "domain": [("id", "in", cant_data.ids)],
                 "view_mode": "tree,form",  # puedes permitir también la vista formulario
-                "res_model": "pmant.checklist.respuesta",
+                "res_model": "pmant.checklist.group",
                 "context": {"create": False},
             }
     def _compute_respuestas_count(self):
+        self.ensure_one()
         total_datos = self.env["pmant.checklist.respuesta"].search_count(
                 [("equipo_id", "=", self.id)]
         )

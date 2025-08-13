@@ -6,8 +6,19 @@
         <field name="prefix">GRP-</field>
         <field name="padding">4</field>
     </record>
+    <record id="view_tree_group" model="ir.ui.view">
+        <field name="name">pmant.checklist.group.treew</field>
+        <field name="model">pmant.checklist.group</field>
+        <field name="arch" type="xml">
+            <tree string="Grupo de respuestas">
+                <field name="name" />
+                <field name="equipo_id" />
+                <field name="create_date" />
+            </tree>
+        </field>
+    </record>
 
-        <record id="view_form_checklist_group" model="ir.ui.view">
+    <record id="view_form_checklist_group" model="ir.ui.view">
         <field name="name">pmant.checklist.group.form</field>
         <field name="model">pmant.checklist.group</field>
         <field name="arch" type="xml">
