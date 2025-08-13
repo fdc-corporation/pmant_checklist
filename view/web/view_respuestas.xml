@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="respuestas_pmant" name="Historial de respuestas CheckList">
+		<t t-call="website.layout">
+			<div class="main">
+				<div class="card-contacto-main">
+					<div class="card-contacto">
+						<div class="text-contacto">
+							<img src="/pmant/static/src/css/iconos/ico_fdc.png" alt="" />
+							<span>
+								FDC CORPORATION E.I.R.L.
+							</span>
+						</div>
+						<div class="contactar">
+							<a href="/contactus" class="bg-primary">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" id="customer-care">
+									<path d="M54,27.29v-.35a21.94,21.94,0,1,0-43.88.12v.2A7,7,0,0,0,5,34v2a7,7,0,0,0,7,7h1.05A13,13,0,0,0,26,55h6a5,5,0,0,0,5-5V49a1,1,0,0,0-1-1H28a1,1,0,0,0-1,1v4H26A11,11,0,0,1,15,42V28a1,1,0,0,0-1-1H12.12A19.94,19.94,0,1,1,52,26.94V27H50a1,1,0,0,0-1,1V42a1,1,0,0,0,1,1h2a7,7,0,0,0,7-7V34A7,7,0,0,0,54,27.29ZM29,50h6a3,3,0,0,1-3,3H29ZM13,41H12a5,5,0,0,1-5-5V34a5,5,0,0,1,5-5h1Zm44-5a5,5,0,0,1-5,5H51V29h1a5,5,0,0,1,5,5Z">
+									</path>
+								</svg>
+								Contactar
+							</a>
+						</div>
+					</div>
+					<div class="main-card-detalles-equipo">
+						<div class="detalle-equipo-header">
+							<div class="name-equipo">
+								<label>
+									Nombre
+								</label>
+								<h4 t-esc="equipo.name">
+								</h4>
+								<!--
+								<button href="" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+								Solicitar servicio
+								</button>
+								-->
+							</div>
+							<div class="img-header-equipo">
+								<img t-att-src="'/web/image?model=maintenance.equipment&amp;id=%s&amp;field=image' % equipo.id" alt="Imagen del equipo" />
+								<img t-att-src="'/web/image?model=maintenance.equipment&amp;id=%s&amp;field=qr_image' % equipo.id" alt="Qr del equipo" />
+							</div>
+							<!--
+							<button href="" type="button" class="btn btn-primary btn-mobile" data-bs-toggle="modal" data-bs-target="#exampleModal">
+							Solicitar servicio
+							</button>
+							-->
+						</div>
+						<div class="descripcion-propieadades-equipo">
+							<div class="propiedades-contenedor">
+								<div class="propiedad">
+									<label>
+										Propietario :
+									</label>
+									<span t-esc="equipo.propietario.name">
+									</span>
+								</div>
+								<div class="propiedad">
+									<label>
+										Ubicación :
+									</label>
+									<span t-esc="equipo.ubicacion.name">
+									</span>
+								</div>
+							</div>
+							<div class="propiedades-contenedor">
+								<div class="propiedad">
+									<label>
+										Categoría :
+									</label>
+									<span t-esc="equipo.category_id.name">
+									</span>
+								</div>
+								<div class="propiedad">
+									<label>
+										Fecha asignada :
+									</label>
+									<span t-esc="equipo.assign_date.strftime('%d/%m/%Y') if equipo.assign_date else ''">
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="main-card-sedes">
+					<div style="display:flex;flex-flow: row wrap;justify-content: space-between;gap: 0px;align-items: center;">
+						<h3>
+							Historial de mantenimiento
+						</h3>
+						<div style="display:flex; gap:10px;">
+							<!-- Example single danger button -->
+							<!--
+							<div class="btn-group">
+							<div>
+							<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter-right" viewBox="0 0 16 16">
+							<path d="M14 10.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0 0 1h7a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0 0 1h11a.5.5 0 0 0 .5-.5" />
+							</svg>
+							</button>
+							<ul class="dropdown-menu">
+							<li>
+							<a class="dropdown-item" t-att-href="'/my/equipo/' + str(equipo.id) + '/historial?filtro=asc'">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
+							<path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5" />
+							</svg>
+							Ascendente
+							</a>
+							</li>
+							<li>
+							<a class="dropdown-item" t-att-href="'/my/equipo/' + str(equipo.id) + '/historial?filtro=desc'">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-short" viewBox="0 0 16 16">
+							<path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4" />
+							</svg>
+							Descendente
+							</a>
+							</li>
+							</ul>
+							</div>
+							</div>
+							-->
+						</div>
+					</div>
+					<div class="main_historail_pmant">
+						<style>
+							/* Estilo consistente con el formulario */
+							.pmant-acc .accordion-item {
+							border: 1px solid rgba(0,0,0,.08);
+							border-radius: .75rem !important;
+							overflow: hidden;
+							box-shadow: 0 1px 2px rgba(0,0,0,.03);
+							margin-bottom: .875rem;
+							background: #fff;
+							}
+							.pmant-acc .accordion-button {
+							padding: .9rem 1.1rem;
+							font-weight: 600;
+							background: #f8f9fa;
+							}
+							.pmant-acc .accordion-button:focus {
+							box-shadow: none;
+							}
+							.pmant-acc .accordion-body {
+							padding: 1rem 1.1rem;
+							background: #fff;
+							}
+							.pmant-table th {
+							position: sticky; top: 0;
+							background: #fff;
+							z-index: 1;
+							}
+							.pmant-badges .badge { margin-left: .35rem; }
+						</style>
+						<t t-if="respuestas">
+							<div class="accordion pmant-acc" id="accChecklist">
+								<t t-foreach="respuestas" t-as="group" t-key="group.id">
+									<t t-set="acc_id" t-value="'grp_%d' % group.id" />
+									<t t-set="total_resp" t-value="len(group.respuestas_ids)" />
+									<div class="accordion-item">
+										<h2 class="accordion-header" t-att-id="'h_' + str(group.id)">
+											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" t-att-data-bs-target="'#' + acc_id" t-att-aria-controls="acc_id">
+												<div class="w-100 d-flex justify-content-between align-items-center">
+													<div class="d-flex align-items-center">
+														<span class="me-2">
+															📋
+														</span>
+														<div>
+															<div>
+																<strong t-esc="group.name" />
+															</div>
+															<small class="text-muted">
+																<t t-esc="group.create_date.strftime('%d/%m/%Y %H:%M')" />
+															</small>
+														</div>
+													</div>
+													<div class="pmant-badges d-flex align-items-center">
+														<span class="badge bg-secondary" t-esc="str(total_resp) + ' respuestas'" />
+														<span class="text-primary ms-3 d-none d-md-inline">
+															Ver detalles
+														</span>
+													</div>
+												</div>
+											</button>
+										</h2>
+										<div class="accordion-collapse collapse" t-att-id="acc_id" data-bs-parent="#accChecklist">
+											<div class="accordion-body">
+												<div class="table-responsive">
+													<table class="table table-sm align-middle pmant-table mb-0">
+														<thead>
+															<tr>
+																<th style="width:45%;">
+																	Pregunta
+																</th>
+																<th style="width:20%;">
+																	Respuesta
+																</th>
+																<th style="width:35%;">
+																	Comentario
+																</th>
+															</tr>
+														</thead>
+														<tbody>
+															<t t-foreach="group.respuestas_ids" t-as="r" t-key="r.id">
+																<tr>
+																	<td>
+																		<t t-esc="r.question_id.name" />
+																	</td>
+																	<td>
+																		<t t-if="r.respuesta_texto">
+																			<span class="text-body">
+																				<t t-esc="r.respuesta_texto" />
+																			</span>
+																		</t>
+																		<t t-else="">
+																			<t t-if="r.respuesta_si_no">
+																				<span class="badge bg-success">
+																					Sí
+																				</span>
+																			</t>
+																			<t t-else="">
+																				<span class="badge bg-danger">
+																					No
+																				</span>
+																			</t>
+																		</t>
+																	</td>
+																	<td>
+																		<t t-if="r.comentario">
+																			<span class="text-muted">
+																				<t t-esc="r.comentario" />
+																			</span>
+																		</t>
+																		<t t-else="">
+																			<span class="text-muted">
+																				—
+																			</span>
+																		</t>
+																	</td>
+																</tr>
+															</t>
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</t>
+							</div>
+						</t>
+						<t t-else="">
+							No cuenta con registros para este equipo; si esto es un error, comuníquese con FDCCORP.
+						</t>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+</odoo>

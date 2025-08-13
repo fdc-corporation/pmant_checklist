@@ -1,89 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <template id="checklist_template" name="Checklist Web Modal">
-    <t t-call="website.layout">
-      <div class="modal fade show" id="FormPmant" tabindex="-1" aria-modal="true" style="display:block;">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content shadow-lg rounded-3">
-            <div class="modal-header bg-primary text-white">
-              <h5 class="modal-title">
-                📝 Formulario de CheckList
-              </h5>
-            </div>
-            <form id="checklist-form" method="POST" t-att-action="'/checklist/submit/%d/%d' % (equipo.id, plantilla.id)">
-              <div class="modal-body">
-                <t t-foreach="plantilla.line_questions" t-as="pregunta">
-                  <div class="mb-4 pb-3 border-bottom">
-                    <!-- Pregunta -->
-                    <label class="form-label fw-semibold">
-                      <t t-esc="pregunta.name" />
-                    </label>
-
-                    <!-- Respuesta tipo sí/no -->
-                    <t t-if="pregunta.tipo_respuesta == 'si_no'">
-                      <div class="form-check form-switch">
-                        <input type="checkbox" class="form-check-input" t-att-name="'respuesta_%d_si_no' % pregunta.id" id="respuesta_si_no_${pregunta.id}" />
-                        <label class="form-check-label" t-att-for="'respuesta_si_no_' + str(pregunta.id)">
-                          Sí
-                        </label>
-                      </div>
-                    </t>
-
-                    <!-- Respuesta tipo texto -->
-                    <t t-if="pregunta.tipo_respuesta == 'texto'">
-                      <textarea class="form-control mt-2" rows="2" t-att-name="'respuesta_%d_texto' % pregunta.id" placeholder="Escribe tu respuesta..."></textarea>
-                    </t>
-
-                    <!-- Comentario adicional -->
-                    <div class="mt-3">
-                      <label class="form-label">
-                        ¿Tienes un comentario adicional?
-                      </label>
-                      <div class="form-check">
-                        <input type="checkbox"
-                          class="form-check-input toggle-comentario"
-                          t-att-id="'comentario_chk_%d' % pregunta.id"
-                          t-att-data-id="'%d' % pregunta.id"
-                          t-att-name="'comentario_%d' % pregunta.id"
-                        />
-                        <label class="form-check-label" t-att-for="'comentario_chk_' + str(pregunta.id)">
-                          Mostrar campo de comentario
-                        </label>
-                      </div>
-                      <div t-att-id="'comentario_box_%d' % pregunta.id" class="comentario-box mt-2" style="display: none;">
-                        <textarea class="form-control" rows="2" placeholder="Escribe tu comentario aquí (opcional)" t-att-name="'comentario_texto_%d' % pregunta.id"></textarea>
-                      </div>
-                    </div>
-                  </div>
-                </t>
-              </div>
-
-              <div class="modal-footer d-flex justify-content-between">
-                <a t-att-href="'/my/equipos/' + str(equipo.id) + '/detalles'" class="btn btn-outline-secondary">
-                  Cancelar
-                </a>
-                <button type="submit" class="btn btn-success">
-                  Registrar Respuesta 
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- JS: mostrar/ocultar comentario -->
-      <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-          const checkboxes = document.querySelectorAll(".toggle-comentario");
-          checkboxes.forEach(function (checkbox) {
-            checkbox.addEventListener("change", function () {
-              const preguntaId = checkbox.dataset.id;
-              const comentarioBox = document.getElementById("comentario_box_" + preguntaId);
-              comentarioBox.style.display = checkbox.checked ? "block" : "none";
-            });
-          });
-        });
-      </script>
-    </t>
-  </template>
+	<template id="checklist_template" name="Checklist Web Modal (Per-pregunta)">
+		<t t-call="website.layout">
+			<style>
+				#FormPmant .modal-dialog { max-width: 800px; }
+				#FormPmant .modal-content { border: 0; border-radius: 1rem; }
+				#FormPmant .modal-header { border-bottom: 0; padding: 1.25rem 1.5rem; }
+				#FormPmant .modal-title { font-weight: 700; }
+				#FormPmant .modal-body { padding: 1rem 1.5rem; }
+				#FormPmant .modal-body-inner { max-height: 70vh; overflow: auto; padding-right: .25rem; width: 90%; margin: 0 auto; }
+				#FormPmant .question-block {
+				padding: 1rem 1rem 1.25rem;
+				border: 1px solid rgba(0,0,0,.08);
+				border-radius: .75rem;
+				background: #fff;
+				box-shadow: 0 1px 2px rgba(0,0,0,.03);
+				margin-bottom: .875rem;
+				}
+				#FormPmant .question-label { font-weight: 600; margin-bottom: .5rem; margin-right: 10px; }
+				#FormPmant .btn-group-yn .btn { min-width: 5.5rem; height: 30px; margin-right: 10px; }
+				#FormPmant .form-footer { gap: .75rem; }
+				#FormPmant .comment-toggle { gap: .75rem; align-items: center; }
+			</style>
+			<div class="modal fade show" id="FormPmant" tabindex="-1" aria-modal="true" style="display:block;">
+				<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 800px !important;">
+					<div class="modal-content shadow-lg">
+						<div class="modal-header text-white">
+							<h5 class="modal-title">
+								📝 Formulario de CheckList
+							</h5>
+						</div>
+						<form id="checklist-form" method="POST" t-att-action="'/checklist/submit/%d/%d' % (equipo.id, plantilla.id)">
+							<input type="hidden" name="csrf_token" t-att-value="request and request.csrf_token()" />
+							<div class="modal-body">
+								<div class="modal-body-inner">
+									<!-- PREGUNTAS -->
+									<t t-foreach="plantilla.line_questions" t-as="pregunta">
+										<div class="question-block">
+											<!-- Texto de la pregunta -->
+											<label class="question-label">
+												<t t-esc="pregunta.name" />
+											</label>
+											<!-- Tipo Sí / No (radios bonitos con Bootstrap 5) -->
+											<t t-if="pregunta.tipo_respuesta == 'si_no'">
+												<div class="btn-group btn-group-yn" role="group" aria-label="Respuesta Sí/No">
+													<input class="btn-check" type="radio" t-att-name="'respuesta_%d_si_no' % pregunta.id" t-att-id="'yn_si_%d' % pregunta.id" value="si" required="required" />
+													<label class="btn btn-outline-success" t-att-for="'yn_si_%d' % pregunta.id">
+														Sí
+													</label>
+													<input class="btn-check" type="radio" t-att-name="'respuesta_%d_si_no' % pregunta.id" t-att-id="'yn_no_%d' % pregunta.id" value="no" required="required" />
+													<label class="btn btn-outline-danger" t-att-for="'yn_no_%d' % pregunta.id">
+														No
+													</label>
+												</div>
+											</t>
+											<!-- Tipo Texto -->
+											<t t-if="pregunta.tipo_respuesta == 'texto'">
+												<div class="form-floating mt-2">
+													<textarea class="form-control" style="height: 100px" t-att-name="'respuesta_%d_texto' % pregunta.id" t-att-id="'txt_%d' % pregunta.id" placeholder="Escribe tu respuesta..."></textarea>
+													<label t-att-for="'txt_%d' % pregunta.id">
+														Respuesta (texto libre)
+													</label>
+												</div>
+											</t>
+											<!-- Comentario adicional POR PREGUNTA -->
+											<div class="mt-3">
+												<div class="d-flex comment-toggle">
+													<div class="form-check form-switch">
+														<input class="form-check-input toggle-comentario" type="checkbox" t-att-id="'cmt_chk_%d' % pregunta.id" t-att-data-id="pregunta.id" t-att-name="'comentario_%d' % pregunta.id" />
+														<label class="form-check-label" t-att-for="'cmt_chk_%d' % pregunta.id">
+															¿Agregar comentario adicional?
+														</label>
+													</div>
+												</div>
+												<div class="mt-3" t-att-id="'cmt_box_%d' % pregunta.id" style="display:none;">
+													<div class="form-floating">
+														<textarea class="form-control" style="height: 110px" t-att-id="'cmt_text_%d' % pregunta.id" t-att-name="'comentario_texto_%d' % pregunta.id" placeholder="Escribe tu comentario (opcional)"></textarea>
+														<label t-att-for="'cmt_text_%d' % pregunta.id">
+															Comentario (opcional)
+														</label>
+													</div>
+												</div>
+											</div>
+										</div>
+									</t>
+								</div>
+							</div>
+							<div class="modal-footer d-flex justify-content-between form-footer">
+								<a t-att-href="'/my/equipos/' + str(equipo.id) + '/detalles'" class="btn btn-outline-secondary">
+									Cancelar
+								</a>
+								<button type="submit" class="btn btn-success">
+									Registrar Respuesta
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<script src="/pmant_checklist/static/src/js/index.js">
+				</script>
+			</div>
+		</t>
+	</template>
 </odoo>

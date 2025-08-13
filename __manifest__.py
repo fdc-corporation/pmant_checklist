@@ -16,7 +16,9 @@
         "view/view_inherit_equipo.xml",
         "view/web/form_pmant.xml",
         "view/web/sumit_web.xml",
-        "view/view_form_plantillas.xml"
+        "view/view_form_plantillas.xml",
+        "view/web/inherit_detalles_equipo.xml",
+        "view/web/view_respuestas.xml",
     ],
     'auto_install': False,
     'application': False,

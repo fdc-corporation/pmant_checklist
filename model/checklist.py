@@ -54,8 +54,26 @@ class Question(models.Model):
 class GroupChecklist(models.Model):
     _name = "pmant.checklist.group"
     _description = "Grupo de Checklists"
+    _order = "create_date desc, id desc"
 
-    name = fields.Char(string="Referencia", required=True, copy=False, readonly=True, default="New")
+    name = fields.Char(
+        string="Referencia",
+        required=True,
+        copy=False,
+        readonly=True,
+        default="New",
+        index=True,
+    )
+
+    # Guarda el equipo directamente en el grupo
+    equipo_id = fields.Many2one(
+        comodel_name="maintenance.equipment",
+        string="Equipo",
+        required=True,
+        ondelete="cascade",
+        index=True,
+    )
+
     respuestas_ids = fields.One2many(
         comodel_name="pmant.checklist.respuesta",
         inverse_name="group_id",
@@ -64,10 +82,31 @@ class GroupChecklist(models.Model):
     )
 
     @api.model
-    def create(self, vals):
-        if vals.get('name', 'New') == 'New':
-            vals['name'] = self.env['ir.sequence'].next_by_code('pmant.checklist.group') or 'New'
-        return super(GroupChecklist, self).create(vals)
+    def create(self, vals_list):
+        # Aseguramos que siempre sea una lista de diccionarios
+        if isinstance(vals_list, dict):
+            vals_list = [vals_list]
+
+        for vals in vals_list:
+            # Asigna secuencia si está en 'New' o vacío
+            if vals.get("name", "New") in (False, "New"):
+                vals["name"] = self.env["ir.sequence"].next_by_code("pmant.checklist.group") or _("GRP/%s") % fields.Date.today()
+            
+            if "respuestas_ids" in vals:
+                # Asegura que las respuestas pertenezcan al equipo del grupo
+                for respuesta in vals["respuestas_ids"]:
+                    if isinstance(respuesta, dict) and "equipo_id" in respuesta:
+                        vals["equipo_id"] = respuesta["equipo_id"]
+
+        return super(GroupChecklist, self).create(vals_list)
+
+    @api.constrains("respuestas_ids", "equipo_id")
+    def _check_respuestas_equipo(self):
+        """Todas las respuestas del grupo deben pertenecer al mismo equipo del grupo."""
+        for rec in self:
+            if rec.respuestas_ids and any(r.equipo_id.id != rec.equipo_id.id for r in rec.respuestas_ids):
+                raise ValidationError(_("Todas las respuestas del grupo deben pertenecer al equipo %s.") % (rec.equipo_id.display_name))
+
 
 
 class Respuesta(models.Model):
