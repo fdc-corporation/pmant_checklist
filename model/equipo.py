@@ -95,8 +95,8 @@ class Equipo(models.Model):
                 "context": {"create": False},
             }
     def _compute_respuestas_count(self):
-        self.ensure_one()
-        cant_data = self.env["pmant.checklist.group"].search(
-                [("equipo_id", "=", self.id)]
-            )
-        self.respuestas_count =  len(cant_data)
+        for record in self:
+            cant_data = self.env["pmant.checklist.group"].search([
+                ("equipo_id", "=", record.id)
+            ])
+            record.respuestas_count = len(cant_data)
