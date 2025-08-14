@@ -24,9 +24,10 @@ class WebForm(http.Controller):
             {"equipo": equipo, "plantilla": plantilla},
         )
 
-
-
-    @http.route("/my/equipo/<int:equipo_id>/checklist/historial", type="http", auth="public", website=True)
+    @http.route(
+        "/my/equipo/<int:equipo_id>/checklist/historial",
+        type="http", auth="public", website=True
+    )
     def checklist_historial(self, equipo_id, **kwargs):
         env = request.env
         equipo = env["maintenance.equipment"].sudo().browse(equipo_id)
@@ -39,13 +40,9 @@ class WebForm(http.Controller):
         )
 
         return request.render(
-            "pmant_checklist.respuestas_pmant",   # ← usa este ID de plantilla
-            {
-                "equipo": equipo,
-                "respuestas": grupos,  # tu variable 'respuestas' ahora son grupos
-            },
+            "pmant_checklist.respuestas_pmant",
+            {"equipo": equipo, "respuestas": grupos},
         )
-
 
     @http.route(
         "/checklist/submit/<int:equipo_id>/<int:plantilla_id>",
@@ -58,7 +55,7 @@ class WebForm(http.Controller):
         if not equipo.exists() or not plantilla.exists():
             return request.not_found()
 
-        # URL de detalle para los botones en correo
+        # URL para botones del correo
         base_url = (
             env["ir.config_parameter"].sudo()
             .get_param("web.base.url", request.httprequest.host_url.rstrip("/"))
@@ -68,10 +65,10 @@ class WebForm(http.Controller):
         respuestas_creadas = []
         preguntas_con_no = []
 
-        # Un solo grupo para este envío
+        # Un solo grupo por envío
         grupo = env["pmant.checklist.group"].sudo().create({
             "equipo_id": equipo.id,
-            "name": "New",  # se asignará secuencia en create()
+            "name": "New",  # tu modelo puede renombrarlo con secuencia en create()
         })
 
         # === Parseo de respuestas del formulario ===
@@ -106,33 +103,45 @@ class WebForm(http.Controller):
             resp = env["pmant.checklist.respuesta"].sudo().create(vals)
             respuestas_creadas.append(resp)
 
-        # === Destinatarios ===
-        destinatarios = set()
-        grp = env.ref("pmant.group_pmant_planner_tarea", raise_if_not_found=False)
-        if grp:
-            destinatarios |= {u.email for u in grp.sudo().users if u.email}
+        # ==============================
+        #   DESTINATARIOS y PLANNER
+        # ==============================
+        # Planner (solo para ALERTA)
+        planner_group = env.ref("pmant.group_pmant_planner_tarea", raise_if_not_found=False)
+        planner_user = env["res.users"]
+        if planner_group:
+            active_users = planner_group.sudo().users.filtered(lambda u: u.active)
+            if active_users:
+                # si hay varios, escoge uno determinístico (menor id)
+                planner_user = active_users.sorted("id")[:1]
 
+        planner_email = planner_user and planner_user.email or False
+
+        # Resumen completo: propietario / ubicación (NO planner)
+        resumen_recipients = set()
         if getattr(equipo, "propietario", False) and equipo.propietario.email:
-            destinatarios.add(equipo.propietario.email)
+            resumen_recipients.add(equipo.propietario.email)
         if getattr(equipo, "ubicacion", False) and equipo.ubicacion.email:
-            destinatarios.add(equipo.ubicacion.email)
+            resumen_recipients.add(equipo.ubicacion.email)
+        # quitar al planner si por algún motivo coincide
+        if planner_email and planner_email in resumen_recipients:
+            resumen_recipients.remove(planner_email)
 
-        email_to = ",".join(sorted(e for e in destinatarios if e))
         email_from = (env.company.sudo().email) or "noreply@tudominio.com"
 
-        # === Correo 1: Resumen completo ===
+        # ==============================
+        #   CORREO 1: RESUMEN COMPLETO
+        # ==============================
         try:
-            if email_to:
+            if resumen_recipients:
                 items_html = []
                 for r in respuestas_creadas:
-                    # valor principal
                     if r.respuesta_texto:
                         respuesta_txt = esc(r.respuesta_texto)
                     else:
                         respuesta_txt = "Sí" if getattr(r, "respuesta_si_no", False) else "No"
 
                     li = f"<li><strong>{esc(r.question_id.name)}</strong>: {respuesta_txt}"
-                    # comentario por pregunta (si lo hay)
                     if getattr(r, "is_comentario", False) and getattr(r, "comentario", ""):
                         li += f"<br/><span style='color:#666'><em>Comentario:</em> {esc(r.comentario)}</span>"
                     li += "</li>"
@@ -158,35 +167,22 @@ class WebForm(http.Controller):
                 </div>
                 """
 
-                env["mail.mail"].sudo().create({
+                request.env["mail.mail"].sudo().create({
                     "subject": f"Checklist completado - {equipo.name}",
                     "body_html": cuerpo_html,
-                    "email_to": email_to,
+                    "email_to": ",".join(sorted(resumen_recipients)),
                     "email_from": email_from,
                 }).send()
             else:
-                _logger.warning("Checklist: no se encontraron destinatarios (grupo/propietario/ubicación).")
+                _logger.info("Checklist resumen: sin destinatarios (propietario/ubicación).")
         except Exception as e:
             _logger.exception("Error al enviar correo resumen de checklist: %s", e)
 
-        # === Correo 2: Alerta si hubo alguna respuesta "No" ===
+        # ===========================================
+        #   CORREO 2: ALERTA SOLO AL PLANNER (si 'No')
+        # ===========================================
         try:
-            if preguntas_con_no:
-                usuarios = grp.users
-                for usuario in usuarios:
-                    vendedor = usuario.partner_id
-                    request.env["crm.lead"].sudo().create({
-                        "name": f"Alerta Checklist - {equipo.name}",
-                        "type": "opportunity",
-                        "partner_id" : equipo.propietario.id if equipo.propietario else equipo.ubicacion.id ,
-                        "user_id": vendedor.id,
-                        "description": "Se detectaron respuestas negativas en el checklist del equipo.",
-                        "automated_probability": 50,
-                        "equipo_tarea" : [(6,0, [equipo.id])],
-                        "ubicacion" : equipo.ubicacion.id
-                    })
-                
-            if email_to and preguntas_con_no:
+            if preguntas_con_no and planner_email:
                 items_no = "".join(
                     f"<li><strong>{esc(p.name)}</strong></li>" for p in preguntas_con_no
                 )
@@ -211,13 +207,36 @@ class WebForm(http.Controller):
                   <p style="color:#999;">Por favor, revise el estado del equipo.</p>
                 </div>
                 """
-                env["mail.mail"].sudo().create({
+
+                request.env["mail.mail"].sudo().create({
                     "subject": f"⚠ Alerta - Respuestas negativas en checklist de {equipo.name}",
                     "body_html": cuerpo_alerta,
-                    "email_to": email_to,
+                    "email_to": planner_email,         # ← SOLO planner
                     "email_from": email_from,
                 }).send()
-                
+
+                # (Opcional) Crear Oportunidad en CRM asignada SOLO al planner
+                if planner_user:
+                    # partner_id: usa propietario si existe; si no, ubicación (ambos son res.partner)
+                    partner_id = False
+                    if getattr(equipo, "propietario", False):
+                        partner_id = equipo.propietario.id
+                    elif getattr(equipo, "ubicacion", False):
+                        partner_id = equipo.ubicacion.id
+
+                    request.env["crm.lead"].sudo().create({
+                        "name": f"⚠ Alerta Checklist - {equipo.name}",
+                        "type": "opportunity",
+                        "partner_id": partner_id or False,
+                        "user_id": planner_user.id,  # ← asignado al planner (res.users)
+                        "description": "Se detectaron respuestas negativas en el checklist del equipo.",
+                        "automated_probability": 50,
+                        # Campos personalizados (si existen en tu modelo):
+                        "equipo_tarea": [(6, 0, [equipo.id])] if hasattr(request.env["crm.lead"], "equipo_tarea") else False,
+                        "ubicacion": equipo.ubicacion.id if hasattr(request.env["crm.lead"], "ubicacion") and getattr(equipo, "ubicacion", False) else False,
+                    })
+            elif preguntas_con_no and not planner_email:
+                _logger.warning("Checklist alerta: hay 'No' pero no hay planner con email.")
         except Exception as e:
             _logger.exception("Error al enviar correo de alerta del checklist: %s", e)
 
