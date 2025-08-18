@@ -6,7 +6,7 @@
 				<div class="card-contacto-main">
 					<div class="card-contacto">
 						<div class="text-contacto">
-							<img src="/pmant/static/src/css/iconos/ico_fdc.png" alt="" />
+							<img src="/pmant/static/src/css/iconos/ico-ct.png" alt="" />
 							<span>
 								FDC CORPORATION E.I.R.L.
 							</span>
@@ -246,7 +246,7 @@
 							</div>
 						</t>
 						<t t-else="">
-							No cuenta con registros para este equipo; si esto es un error, comuníquese con FDCCORP.
+							No cuenta con registros para este equipo; si esto es un error, comuníquese con Compresores de Tornillo S.A.C.
 						</t>
 					</div>
 				</div>
