@@ -107,10 +107,10 @@ class WebForm(http.Controller):
         #   DESTINATARIOS y PLANNER
         # ==============================
         # Planner (solo para ALERTA)
-        planner_group = env.ref("pmant.group_pmant_planner_tarea", raise_if_not_found=False)
+        planner_group = env.ref("pmant.group_pmant_planner", raise_if_not_found=False)
         planner_user = env["res.users"]
         if planner_group:
-            active_users = planner_group.sudo().users.filtered(lambda u: u.active)
+            active_users = planner_group.sudo().user_ids.filtered(lambda u: u.active)
             if active_users:
                 # si hay varios, escoge uno determinístico (menor id)
                 planner_user = active_users.sorted("id")[:1]

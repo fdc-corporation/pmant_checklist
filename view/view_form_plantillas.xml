@@ -5,11 +5,11 @@
         <field name="name">pmant.checklist.tree</field>
         <field name="model">pmant.checklist</field>
         <field name="arch" type="xml">
-            <tree string="Checklists de Mantenimiento">
+            <list string="Checklists de Mantenimiento">
                 <field name="name"/>
                 <field name="creado_por"/>
                 <field name="fecha_creacion"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -31,10 +31,10 @@
                     <notebook>
                         <page string="Preguntas del Checklist">
                             <field name="line_questions">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="name"/>
                                     <field name="tipo_respuesta"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -47,7 +47,7 @@
     <record id="action_pmant_checklist" model="ir.actions.act_window">
         <field name="name">Checklist de Mantenimiento</field>
         <field name="res_model">pmant.checklist</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p>
                 Crea y administra listas de verificación para los mantenimientos.

@@ -10,11 +10,11 @@
         <field name="name">pmant.checklist.group.treew</field>
         <field name="model">pmant.checklist.group</field>
         <field name="arch" type="xml">
-            <tree string="Grupo de respuestas">
+            <list string="Grupo de respuestas">
                 <field name="name" />
                 <field name="equipo_id" />
                 <field name="create_date" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -59,14 +59,14 @@
         <field name="name">pmant.checklist.respuesta.tree</field>
         <field name="model">pmant.checklist.respuesta</field>
         <field name="arch" type="xml">
-            <tree string="Respuesta del Checklist">
+            <list string="Respuesta del Checklist">
                 <field name="question_id"/>
                 <field name="respuesta_texto" />
                 <field name="respuesta_si_no" />
                 <field name="group_id" />
                 <field name="usuario_responsable" readonly="1"/>
                 <field name="fecha_respuesta" readonly="1"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -87,10 +87,10 @@
                     <notebook>
                         <page string="Preguntas del Checklist">
                             <field name="line_questions">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="name"/>
                                     <field name="tipo_respuesta"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>

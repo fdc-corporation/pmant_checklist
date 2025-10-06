@@ -90,7 +90,7 @@ class Equipo(models.Model):
                 "name": "Respuestas del Checklist",
                 "type": "ir.actions.act_window",  # ¡Este es el campo que faltaba!
                 "domain": [("id", "in", cant_data.ids)],
-                "view_mode": "tree,form",  # puedes permitir también la vista formulario
+                "view_mode": "list,form",  # puedes permitir también la vista formulario
                 "res_model": "pmant.checklist.group",
                 "context": {"create": False},
             }
