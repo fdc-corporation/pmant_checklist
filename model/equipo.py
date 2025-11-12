@@ -95,9 +95,7 @@ class Equipo(models.Model):
                 "context": {"create": False},
             }
     def _compute_respuestas_count(self):
-        counts = dict(self.env["pmant.checklist.group"].read_group(
-            [('equipo_id', 'in', self.ids)],
-            ['equipo_id'], ['equipo_id']
-        ))
-        for record in self:
-            record.respuestas_count = counts.get(record.id, 0)
+        for rec in self:
+            rec.document_count = self.env["pmant.checklist.group"].search_count([
+                ("equipo_id", "=", self.id)
+            ])
