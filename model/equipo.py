@@ -50,6 +50,13 @@ class Equipo(models.Model):
         store=True,
     )
 
+    def _compute_respuestas_count(self):
+        for rec in self:
+            rec.respuestas_count = self.env["pmant.checklist.group"].search_count([
+                ("equipo_id", "=", self.id)
+            ])
+
+
     @api.depends('plantilla_preguntas')
     def _compute_qr_checklist(self):
         for record in self:
@@ -94,8 +101,3 @@ class Equipo(models.Model):
                 "res_model": "pmant.checklist.group",
                 "context": {"create": False},
             }
-    def _compute_respuestas_count(self):
-        for rec in self:
-            rec.document_count = self.env["pmant.checklist.group"].search_count([
-                ("equipo_id", "=", self.id)
-            ])
