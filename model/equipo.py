@@ -94,7 +94,6 @@ class Equipo(models.Model):
                 "res_model": "pmant.checklist.group",
                 "context": {"create": False},
             }
-    @api.depends('id')
     def _compute_respuestas_count(self):
         counts = dict(self.env["pmant.checklist.group"].read_group(
             [('equipo_id', 'in', self.ids)],
