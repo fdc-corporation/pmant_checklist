@@ -52,9 +52,7 @@ class Equipo(models.Model):
 
     def _compute_respuestas_count(self):
         for rec in self:
-            rec.respuestas_count = self.env["pmant.checklist.group"].search_count([
-                ("equipo_id", "=", self.id)
-            ])
+            rec.respuestas_count = len(rec.respuestas_ids)
 
 
     @api.depends('plantilla_preguntas')
