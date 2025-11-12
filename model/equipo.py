@@ -50,6 +50,7 @@ class Equipo(models.Model):
         store=True,
     )
 
+    @api.depends('respuestas_ids')
     def _compute_respuestas_count(self):
         for rec in self:
             rec.respuestas_count = len(rec.respuestas_ids)
