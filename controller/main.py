@@ -213,7 +213,7 @@ class WebForm(http.Controller):
                     "body_html": cuerpo_alerta,
                     "email_to": planner_email,         # ← SOLO planner
                     "email_from": email_from,
-                }).send()
+                }).action_send_and_close()
 
                 # (Opcional) Crear Oportunidad en CRM asignada SOLO al planner
                 if planner_user:
