@@ -8,7 +8,6 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='warranty_date']" position="after">
                     <field name="plantilla_preguntas"></field>
-                    <field name="respuestas_ids" invisible="1"></field>
                 </xpath>
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button invisible="not plantilla_preguntas" class="oe_stat_button" type="object" name="action_view_respuestas" icon="fa-list-alt">
