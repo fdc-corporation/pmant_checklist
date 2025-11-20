@@ -127,7 +127,8 @@ class WebForm(http.Controller):
         if planner_email and planner_email in resumen_recipients:
             resumen_recipients.remove(planner_email)
 
-        email_from = planner_email or "noreply@tudominio.com"
+        email_from = (env.company.sudo().email) or "fdccorp@fdc-corporation.com"
+
 
         # ==============================
         #   CORREO 1: RESUMEN COMPLETO
