@@ -8,15 +8,26 @@ _logger = logging.getLogger(__name__)
 
 class WebForm(http.Controller):
 
+    @staticmethod
+    def _equipment_is_allowed(equipment):
+        commercial_partner = request.env.user.partner_id.commercial_partner_id
+        return bool(
+            equipment
+            and (
+                equipment.propietario.commercial_partner_id == commercial_partner
+                or equipment.ubicacion.commercial_partner_id == commercial_partner
+            )
+        )
+
     @http.route(
         "/my/equipos/<int:equipo_id>/checklist/<int:plantilla_id>",
-        type="http", auth="public", website=True
+        type="http", auth="user", website=True
     )
     def show_checklist(self, equipo_id, plantilla_id, **kwargs):
         env = request.env
         equipo = env["maintenance.equipment"].sudo().browse(equipo_id)
         plantilla = env["pmant.checklist"].sudo().browse(plantilla_id)
-        if not equipo.exists() or not plantilla.exists():
+        if not equipo.exists() or not plantilla.exists() or not self._equipment_is_allowed(equipo):
             return request.not_found()
 
         return request.render(
@@ -26,12 +37,12 @@ class WebForm(http.Controller):
 
     @http.route(
         "/my/equipo/<int:equipo_id>/checklist/historial",
-        type="http", auth="public", website=True
+        type="http", auth="user", website=True
     )
     def checklist_historial(self, equipo_id, **kwargs):
         env = request.env
         equipo = env["maintenance.equipment"].sudo().browse(equipo_id)
-        if not equipo.exists():
+        if not equipo.exists() or not self._equipment_is_allowed(equipo):
             return request.not_found()
 
         grupos = env["pmant.checklist.group"].sudo().search(
@@ -46,13 +57,13 @@ class WebForm(http.Controller):
 
     @http.route(
         "/checklist/submit/<int:equipo_id>/<int:plantilla_id>",
-        type="http", auth="public", website=True, csrf=False
+        type="http", auth="user", website=True, methods=["POST"], csrf=True
     )
     def submit_checklist(self, equipo_id, plantilla_id, **post):
         env = request.env
         equipo = env["maintenance.equipment"].sudo().browse(equipo_id)
         plantilla = env["pmant.checklist"].sudo().browse(plantilla_id)
-        if not equipo.exists() or not plantilla.exists():
+        if not equipo.exists() or not plantilla.exists() or not self._equipment_is_allowed(equipo):
             return request.not_found()
 
         # URL para botones del correo
@@ -225,7 +236,7 @@ class WebForm(http.Controller):
                     elif getattr(equipo, "ubicacion", False):
                         partner_id = equipo.ubicacion.id
 
-                    request.env["crm.lead"].sudo().create({
+                    lead_values = {
                         "name": f"⚠ Alerta Checklist - {equipo.name}",
                         "type": "opportunity",
                         "partner_id": partner_id or False,
@@ -233,9 +244,13 @@ class WebForm(http.Controller):
                         "description": "Se detectaron respuestas negativas en el checklist del equipo.",
                         "automated_probability": 50,
                         # Campos personalizados (si existen en tu modelo):
-                        "equipo_tarea": [(6, 0, [equipo.id])] if hasattr(request.env["crm.lead"], "equipo_tarea") else False,
-                        "ubicacion": equipo.ubicacion.id if hasattr(request.env["crm.lead"], "ubicacion") and getattr(equipo, "ubicacion", False) else False,
-                    })
+                    }
+                    lead_model = request.env["crm.lead"]
+                    if "equipo_tarea" in lead_model._fields:
+                        lead_values["equipo_tarea"] = [(6, 0, [equipo.id])]
+                    if "ubicacion" in lead_model._fields and equipo.ubicacion:
+                        lead_values["ubicacion"] = equipo.ubicacion.id
+                    lead_model.sudo().create(lead_values)
             elif preguntas_con_no and not planner_email:
                 _logger.warning("Checklist alerta: hay 'No' pero no hay planner con email.")
         except Exception as e:

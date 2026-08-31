@@ -72,7 +72,7 @@ class Equipo(models.Model):
 
         for record in self:
             if record.plantilla_preguntas:
-                url = f"{base_url}/my/equipo/{record.id}/checklist/{record.plantilla_preguntas.id}"
+                url = f"{base_url}/my/equipos/{record.id}/checklist/{record.plantilla_preguntas.id}"
 
                 qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
                 qr.add_data(url)

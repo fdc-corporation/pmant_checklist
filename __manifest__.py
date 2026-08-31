@@ -1,6 +1,6 @@
 {
     'name': 'Pmant CheckList',
-    'version': '1.0',
+    'version': '19.0.2.1.0',
     'description': 'Módulo para gestionar checklist de mantenimiento - FDCCORP',
     'summary': '',
     'author': 'Yostin Palacios',
@@ -11,6 +11,7 @@
         'base',"pmant", "web", "website", "maintenance",
     ],
     'data': [
+        'data/sequence.xml',
         'security/ir.model.access.csv',
         "view/view_form_preguntas.xml",
         "view/view_inherit_equipo.xml",

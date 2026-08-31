@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_pmant_checklist_group" model="ir.sequence">
+        <field name="name">Grupo de checklist</field>
+        <field name="code">pmant.checklist.group</field>
+        <field name="prefix">CHK/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

@@ -1,5 +1,5 @@
 from odoo import models, fields, _, api
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class CheckList(models.Model):
@@ -81,24 +81,14 @@ class GroupChecklist(models.Model):
         help="Respuestas asociadas a las preguntas del checklist de este grupo",
     )
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
-        # Aseguramos que siempre sea una lista de diccionarios
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
-
         for vals in vals_list:
             # Asigna secuencia si está en 'New' o vacío
             if vals.get("name", "New") in (False, "New"):
                 vals["name"] = self.env["ir.sequence"].next_by_code("pmant.checklist.group") or _("GRP/%s") % fields.Date.today()
             
-            if "respuestas_ids" in vals:
-                # Asegura que las respuestas pertenezcan al equipo del grupo
-                for respuesta in vals["respuestas_ids"]:
-                    if isinstance(respuesta, dict) and "equipo_id" in respuesta:
-                        vals["equipo_id"] = respuesta["equipo_id"]
-
-        return super(GroupChecklist, self).create(vals_list)
+        return super().create(vals_list)
 
     @api.constrains("respuestas_ids", "equipo_id")
     def _check_respuestas_equipo(self):
@@ -152,5 +142,4 @@ class Respuesta(models.Model):
         help="Comentario adicional sobre la respuesta, si aplica",
         default="",
     )
-
 
